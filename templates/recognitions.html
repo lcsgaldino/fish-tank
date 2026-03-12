@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+
+<title>Recognition Wall</title>
+<link rel="stylesheet" href="/static/style.css">
+<img src="/static/ibm_logo.png" class="ibm-logo">
+
+</head>
+
+<body>
+
+<h1>🏆 Recognition Wall</h1>
+
+<a href="/" class="back-button">⬅ Back to Fish Tank</a>
+
+<div class="recognition-grid">
+
+{% for img in imagens %}
+
+<div class="recognition-card">
+
+<img src="/static/recognitions/{{img}}">
+
+</div>
+
+{% endfor %}
+
+</div>
+
+</body>
+</html>

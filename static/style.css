@@ -1,0 +1,211 @@
+body {
+
+    margin: 0;
+    font-family: Arial, Helvetica, sans-serif;
+
+    background-image: url("/static/fundo-ibm.png");
+    background-size: cover;
+    background-position: center;
+    background-attachment: fixed;
+
+}
+.ibm-logo{
+
+    position: fixed;
+
+    top: 20px;
+    right: 30px;
+
+    width: 120px;
+
+    opacity: 0.9;
+
+    z-index: 999;
+
+}
+
+h1 {
+
+    text-align: center;
+    color: white;
+
+    margin-top: 30px;
+    margin-bottom: 30px;
+
+    text-shadow: 0px 2px 10px rgba(0,0,0,0.6);
+
+}
+
+.grid {
+
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+    gap: 25px;
+
+    padding: 40px;
+
+}
+
+.card {
+
+    background: rgba(255,255,255,0.92);
+    border-radius: 12px;
+    padding: 20px;
+
+    box-shadow: 0px 8px 20px rgba(0,0,0,0.2);
+
+}
+
+.comment{
+
+background:#eef2f5;
+padding:8px;
+margin-top:5px;
+border-radius:6px;
+
+}
+
+input, textarea{
+
+width:100%;
+margin-top:10px;
+padding:8px;
+border-radius:6px;
+border:1px solid #ccc;
+
+}
+
+button{
+
+margin-top:10px;
+padding:8px 12px;
+border:none;
+background:#0f62fe;
+color:white;
+border-radius:6px;
+cursor:pointer;
+
+}
+
+.stats{
+
+display:flex;
+justify-content:center;
+gap:30px;
+
+margin-bottom:30px;
+
+}
+
+.stat-card{
+
+background:rgba(255,255,255,0.9);
+
+padding:20px;
+border-radius:12px;
+
+width:180px;
+text-align:center;
+
+box-shadow:0px 5px 15px rgba(0,0,0,0.2);
+
+}
+
+.stat-card h2{
+
+font-size:30px;
+margin:0;
+
+}
+
+.stat-card p{
+
+font-size:28px;
+font-weight:bold;
+margin:5px 0;
+
+}
+
+.stat-card span{
+
+font-size:14px;
+color:#555;
+
+}
+.recognition-grid{
+
+display:grid;
+grid-template-columns:repeat(auto-fit, minmax(350px,1fr));
+gap:30px;
+
+padding:40px;
+
+}
+
+.recognition-card{
+
+background:white;
+border-radius:12px;
+
+box-shadow:0px 6px 15px rgba(0,0,0,0.2);
+
+padding:10px;
+
+}
+
+.recognition-card img{
+
+width:100%;
+border-radius:8px;
+
+}
+.clickable{
+
+text-decoration:none;
+color:inherit;
+
+cursor:pointer;
+
+transition:transform 0.15s, box-shadow 0.15s;
+
+}
+
+.clickable:hover{
+
+transform:translateY(-3px);
+
+box-shadow:0px 8px 20px rgba(0,0,0,0.25);
+
+}
+.back-button{
+
+display:inline-block;
+
+margin:20px 40px;
+
+padding:10px 18px;
+
+background:#0f62fe;
+color:white;
+
+border-radius:8px;
+
+text-decoration:none;
+
+font-weight:bold;
+
+box-shadow:0px 4px 10px rgba(0,0,0,0.25);
+
+transition:all 0.2s ease;
+
+}
+
+.back-button:hover{
+
+background:#0353e9;
+
+transform:translateY(-2px);
+
+box-shadow:0px 6px 14px rgba(0,0,0,0.35);
+
+}

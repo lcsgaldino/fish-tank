@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+<title>Fish Tank</title>
+<link rel="stylesheet" href="/static/style.css">
+<img src="/static/ibm_logo.png" class="ibm-logo">
+<a href="/recognitions" class="recognition-btn">
+</a>
+</head>
+
+<body>
+
+<h1>🐟 Fish Tank - Contribution Board</h1>
+
+<div class="stats">
+
+<div class="stat-card">
+<h2>🐟</h2>
+<p>{{total_peixes}}</p>
+<span>Total Contributions</span>
+</div>
+
+<div class="stat-card">
+<h2>🦈</h2>
+<p>{{big_fish}}</p>
+<span>Big Fish</span>
+</div>
+
+<div class="stat-card">
+<h2>💬</h2>
+<p>{{total_comentarios}}</p>
+<span>Comments</span>
+</div>
+
+<a href="/recognitions" class="stat-card clickable">
+
+<h2>🏆</h2>
+<p>Recognition Wall</p>
+<span>Check my recognitions</span>
+
+</a>
+
+</div>
+
+<div class="grid">
+
+{% for peixe in peixes %}
+
+<div class="card">
+
+<h2>Peixe #{{ peixe[0] }}</h2>
+
+<p><b>Activity:</b> {{ peixe[1] }}</p>
+<p><b>Period:</b> {{ peixe[2] }}</p>
+<p><b>Ranking:</b> {{ peixe[3] }}</p>
+<p><b>Impact:</b> {{ peixe[4] }}</p>
+
+<h3>💬 Comments</h3>
+
+<div class="comments-box">
+
+{% for c in comentarios %}
+
+{% if c[1] == peixe[0] %}
+
+<div class="comment">
+<strong>{{ c[2] }}</strong>: {{ c[3] }}
+</div>
+
+{% endif %}
+
+{% endfor %}
+
+</div>
+
+<form action="/comentar" method="POST">
+
+<input type="hidden" name="peixe_id" value="{{ peixe[0] }}">
+
+<input type="text" name="autor" placeholder="Your name">
+
+<textarea name="comentario" placeholder="Write a comment"></textarea>
+
+<button type="submit">Comment</button>
+
+</form>
+
+</div>
+
+{% endfor %}
+
+</div>
+
+</body>
+</html>

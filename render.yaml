@@ -1,0 +1,6 @@
+services:
+  - type: web
+    name: fish-tank
+    env: python
+    buildCommand: "pip install -r requirements.txt"
+    startCommand: "gunicorn fish_tank:app"
