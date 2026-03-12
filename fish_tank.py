@@ -110,8 +110,34 @@ def recognitions():
 
     return render_template("recognitions.html", imagens=imagens)
 
+#------------------------------ API --------------------
+
+@app.route("/api/add_peixe", methods=["POST"])
+def api_add_peixe():
+
+    data = request.json
+
+    atividade = data.get("atividade")
+    periodo = data.get("periodo")
+    ranking = data.get("ranking")
+    impacto = data.get("impacto")
+
+    conn = get_db()
+    cursor = conn.cursor()
+
+    cursor.execute("""
+    INSERT INTO peixes (atividade, periodo, ranking, impacto)
+    VALUES (?, ?, ?, ?)
+    """, (atividade, periodo, ranking, impacto))
+
+    conn.commit()
+    conn.close()
+
+    return {"status": "success"}
+
 
 # ---------------- RUN ----------------
 
 if __name__ == "__main__":
     app.run(debug=True)
+
