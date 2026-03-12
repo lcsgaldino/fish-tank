@@ -4,6 +4,7 @@ from tkcalendar import DateEntry
 from datetime import datetime
 import win32com.client as win32
 from PIL import Image
+import requests
 
 ctk.set_appearance_mode("dark")
 ctk.set_default_color_theme("blue")
@@ -152,6 +153,23 @@ def salvar():
     conn.commit()
 
     numero_peixe_atual = obter_numero_peixe()
+
+    # ---------------- ENVIA PARA O FISH TANK ONLINE ----------------
+
+    try:
+
+        requests.post(
+            "https://fish-tank-p6c1.onrender.com/api/add_peixe",
+            json={
+                "atividade": atividade.get(),
+                "periodo": periodo,
+                "ranking": ranking.get(),
+                "impacto": impacto.get("1.0", "end")
+            }
+        )
+
+    except:
+        print("Erro ao enviar para Fish Tank online")
 
     carregar()
 
