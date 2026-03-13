@@ -5,11 +5,13 @@ import psycopg2
 
 app = Flask(__name__)
 
-# ---------------- DATABASE SQLITE (PEIXES) ----------------
+# ---------------- PATH DATABASE ----------------
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 DB_PATH = os.path.join(BASE_DIR, "peixaria.db")
 
+
+# ---------------- SQLITE (PEIXES) ----------------
 
 def get_db():
 
@@ -36,9 +38,12 @@ def get_db():
 
 def get_pg():
 
-    conn = psycopg2.connect(
-        os.environ.get("DATABASE_URL")
-    )
+    database_url = os.environ.get("DATABASE_URL")
+
+    if not database_url:
+        raise Exception("DATABASE_URL não encontrada no Render")
+
+    conn = psycopg2.connect(database_url)
 
     return conn
 
@@ -66,7 +71,8 @@ def init_pg():
 @app.route("/")
 def mural():
 
-    # PEIXES (SQLITE)
+    # ---- PEIXES (SQLITE)
+
     conn = get_db()
     cursor = conn.cursor()
 
@@ -75,31 +81,31 @@ def mural():
 
     conn.close()
 
-    # COMENTARIOS (POSTGRES)
+    # ---- COMENTARIOS (POSTGRES)
+
     pg = get_pg()
     cursor_pg = pg.cursor()
 
     cursor_pg.execute("SELECT peixe_id, autor, comentario FROM comentarios")
-    comentarios_raw = cursor_pg.fetchall()
 
-    comentarios = []
-
-    for c in comentarios_raw:
-        comentarios.append({
+    comentarios = [
+        {
             "peixe_id": c[0],
             "autor": c[1],
             "comentario": c[2]
-        })
+        }
+        for c in cursor_pg.fetchall()
+    ]
 
     pg.close()
 
-    # -------- ESTATÍSTICAS --------
+    # ---- ESTATÍSTICAS
 
     total_peixes = len(peixes)
 
     big_fish = 0
     for peixe in peixes:
-        if "Tubarão" in peixe["ranking"] or "Dourado" in peixe["ranking"]:
+        if peixe["ranking"] and ("Tubarão" in peixe["ranking"] or "Dourado" in peixe["ranking"]):
             big_fish += 1
 
     total_comentarios = len(comentarios)
@@ -123,11 +129,18 @@ def comentar():
     autor = request.form.get("autor", "").strip()
     comentario = request.form.get("comentario", "").strip()
 
-    if comentario == "":
+    if not comentario:
+        return redirect("/")
+
+    if not peixe_id:
         return redirect("/")
 
     if autor == "":
         autor = "Anonymous"
+
+    peixe_id = int(peixe_id)
+
+    print("Comentário salvo:", peixe_id, autor, comentario)
 
     conn = get_pg()
     cursor = conn.cursor()
@@ -158,12 +171,15 @@ def recognitions():
     return render_template("recognitions.html", imagens=imagens)
 
 
-# ---------------- API (ADICIONAR PEIXE) ----------------
+# ---------------- API PEIXARIA DESKTOP ----------------
 
 @app.route("/api/add_peixe", methods=["POST"])
 def api_add_peixe():
 
     data = request.json
+
+    if not data:
+        return {"status": "error", "message": "No JSON received"}
 
     atividade = data.get("atividade")
     periodo = data.get("periodo")
@@ -174,8 +190,8 @@ def api_add_peixe():
     cursor = conn.cursor()
 
     cursor.execute("""
-    INSERT INTO peixes (atividade, periodo, ranking, impacto)
-    VALUES (?, ?, ?, ?)
+        INSERT INTO peixes (atividade, periodo, ranking, impacto)
+        VALUES (?, ?, ?, ?)
     """, (atividade, periodo, ranking, impacto))
 
     conn.commit()
