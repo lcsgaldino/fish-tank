@@ -1,10 +1,11 @@
 from flask import Flask, render_template, request, redirect
 import sqlite3
 import os
+import psycopg2
 
 app = Flask(__name__)
 
-# ---------------- DATABASE ----------------
+# ---------------- DATABASE SQLITE (PEIXES) ----------------
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 DB_PATH = os.path.join(BASE_DIR, "peixaria.db")
@@ -17,11 +18,12 @@ def get_db():
     cursor = conn.cursor()
 
     cursor.execute("""
-    CREATE TABLE IF NOT EXISTS comentarios(
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    peixe_id INTEGER,
-    autor TEXT,
-    comentario TEXT
+    CREATE TABLE IF NOT EXISTS peixes(
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        atividade TEXT,
+        periodo TEXT,
+        ranking TEXT,
+        impacto TEXT
     )
     """)
 
@@ -30,19 +32,66 @@ def get_db():
     return conn
 
 
+# ---------------- POSTGRES (COMENTARIOS) ----------------
+
+def get_pg():
+
+    conn = psycopg2.connect(
+        os.environ.get("DATABASE_URL")
+    )
+
+    return conn
+
+
+def init_pg():
+
+    conn = get_pg()
+    cursor = conn.cursor()
+
+    cursor.execute("""
+    CREATE TABLE IF NOT EXISTS comentarios(
+        id SERIAL PRIMARY KEY,
+        peixe_id INTEGER,
+        autor TEXT,
+        comentario TEXT
+    )
+    """)
+
+    conn.commit()
+    conn.close()
+
+
 # ---------------- MURAL ----------------
 
 @app.route("/")
 def mural():
 
+    # PEIXES (SQLITE)
     conn = get_db()
     cursor = conn.cursor()
 
     cursor.execute("SELECT * FROM peixes ORDER BY id DESC")
     peixes = cursor.fetchall()
 
-    cursor.execute("SELECT * FROM comentarios")
-    comentarios = cursor.fetchall()
+    conn.close()
+
+    # COMENTARIOS (POSTGRES)
+    pg = get_pg()
+    cursor_pg = pg.cursor()
+
+    cursor_pg.execute("SELECT peixe_id, autor, comentario FROM comentarios")
+    comentarios_raw = cursor_pg.fetchall()
+
+    comentarios = []
+
+    for c in comentarios_raw:
+        comentarios.append({
+            "peixe_id": c[0],
+            "autor": c[1],
+            "comentario": c[2]
+        })
+
+    pg.close()
 
     # -------- ESTATÍSTICAS --------
 
@@ -54,8 +103,6 @@ def mural():
             big_fish += 1
 
     total_comentarios = len(comentarios)
-
-    conn.close()
 
     return render_template(
         "mural.html",
@@ -82,11 +129,11 @@ def comentar():
     if autor == "":
         autor = "Anonymous"
 
-    conn = get_db()
+    conn = get_pg()
     cursor = conn.cursor()
 
     cursor.execute(
-        "INSERT INTO comentarios (peixe_id, autor, comentario) VALUES (?, ?, ?)",
+        "INSERT INTO comentarios (peixe_id, autor, comentario) VALUES (%s,%s,%s)",
         (peixe_id, autor, comentario)
     )
 
@@ -110,7 +157,8 @@ def recognitions():
 
     return render_template("recognitions.html", imagens=imagens)
 
-#------------------------------ API --------------------
+
+# ---------------- API (ADICIONAR PEIXE) ----------------
 
 @app.route("/api/add_peixe", methods=["POST"])
 def api_add_peixe():
@@ -136,8 +184,9 @@ def api_add_peixe():
     return {"status": "success"}
 
 
-# ---------------- RUN ----------------
+# ---------------- START APP ----------------
+
+init_pg()
 
 if __name__ == "__main__":
     app.run(debug=True)
-
