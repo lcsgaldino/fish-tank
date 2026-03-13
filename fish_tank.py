@@ -1,57 +1,39 @@
 from flask import Flask, render_template, request, redirect
-import sqlite3
 import os
 import psycopg2
 
 app = Flask(__name__)
 
-# ---------------- PATH DATABASE ----------------
-
-BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-DB_PATH = os.path.join(BASE_DIR, "peixaria.db")
-
-
-# ---------------- SQLITE (PEIXES) ----------------
+# ---------------- POSTGRES CONNECTION ----------------
 
 def get_db():
-
-    conn = sqlite3.connect(DB_PATH)
-    conn.row_factory = sqlite3.Row
-    cursor = conn.cursor()
-
-    cursor.execute("""
-    CREATE TABLE IF NOT EXISTS peixes(
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        atividade TEXT,
-        periodo TEXT,
-        ranking TEXT,
-        impacto TEXT
-    )
-    """)
-
-    conn.commit()
-
-    return conn
-
-
-# ---------------- POSTGRES (COMENTARIOS) ----------------
-
-def get_pg():
 
     database_url = os.environ.get("DATABASE_URL")
 
     if not database_url:
-        raise Exception("DATABASE_URL não encontrada no Render")
+        raise Exception("DATABASE_URL não encontrada")
 
     conn = psycopg2.connect(database_url)
 
     return conn
 
 
-def init_pg():
+# ---------------- INIT DATABASE ----------------
 
-    conn = get_pg()
+def init_db():
+
+    conn = get_db()
     cursor = conn.cursor()
+
+    cursor.execute("""
+    CREATE TABLE IF NOT EXISTS peixes(
+        id SERIAL PRIMARY KEY,
+        atividade TEXT,
+        periodo TEXT,
+        ranking TEXT,
+        impacto TEXT
+    )
+    """)
 
     cursor.execute("""
     CREATE TABLE IF NOT EXISTS comentarios(
@@ -71,22 +53,27 @@ def init_pg():
 @app.route("/")
 def mural():
 
-    # ---- PEIXES (SQLITE)
-
     conn = get_db()
     cursor = conn.cursor()
 
+    # ---- PEIXES
+
     cursor.execute("SELECT * FROM peixes ORDER BY id DESC")
-    peixes = cursor.fetchall()
 
-    conn.close()
+    peixes = [
+        {
+            "id": p[0],
+            "atividade": p[1],
+            "periodo": p[2],
+            "ranking": p[3],
+            "impacto": p[4]
+        }
+        for p in cursor.fetchall()
+    ]
 
-    # ---- COMENTARIOS (POSTGRES)
+    # ---- COMENTARIOS
 
-    pg = get_pg()
-    cursor_pg = pg.cursor()
-
-    cursor_pg.execute("SELECT peixe_id, autor, comentario FROM comentarios")
+    cursor.execute("SELECT peixe_id, autor, comentario FROM comentarios")
 
     comentarios = [
         {
@@ -94,19 +81,18 @@ def mural():
             "autor": c[1],
             "comentario": c[2]
         }
-        for c in cursor_pg.fetchall()
+        for c in cursor.fetchall()
     ]
 
-    pg.close()
+    conn.close()
 
     # ---- ESTATÍSTICAS
 
     total_peixes = len(peixes)
 
-    big_fish = 0
-    for peixe in peixes:
-        if peixe["ranking"] and ("Tubarão" in peixe["ranking"] or "Dourado" in peixe["ranking"]):
-            big_fish += 1
+    big_fish = sum(
+        1 for p in peixes if "Tubarão" in p["ranking"] or "Dourado" in p["ranking"]
+    )
 
     total_comentarios = len(comentarios)
 
@@ -132,17 +118,10 @@ def comentar():
     if not comentario:
         return redirect("/")
 
-    if not peixe_id:
-        return redirect("/")
-
     if autor == "":
         autor = "Anonymous"
 
-    peixe_id = int(peixe_id)
-
-    print("Comentário salvo:", peixe_id, autor, comentario)
-
-    conn = get_pg()
+    conn = get_db()
     cursor = conn.cursor()
 
     cursor.execute(
@@ -161,7 +140,7 @@ def comentar():
 @app.route("/recognitions")
 def recognitions():
 
-    pasta = os.path.join(BASE_DIR, "static", "recognitions")
+    pasta = "static/recognitions"
 
     imagens = []
 
@@ -179,7 +158,7 @@ def api_add_peixe():
     data = request.json
 
     if not data:
-        return {"status": "error", "message": "No JSON received"}
+        return {"status": "error"}
 
     atividade = data.get("atividade")
     periodo = data.get("periodo")
@@ -191,7 +170,7 @@ def api_add_peixe():
 
     cursor.execute("""
         INSERT INTO peixes (atividade, periodo, ranking, impacto)
-        VALUES (?, ?, ?, ?)
+        VALUES (%s,%s,%s,%s)
     """, (atividade, periodo, ranking, impacto))
 
     conn.commit()
@@ -200,9 +179,9 @@ def api_add_peixe():
     return {"status": "success"}
 
 
-# ---------------- START APP ----------------
+# ---------------- START ----------------
 
-init_pg()
+init_db()
 
 if __name__ == "__main__":
     app.run(debug=True)

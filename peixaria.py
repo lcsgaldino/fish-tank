@@ -96,7 +96,7 @@ def enviar_email():
     outlook = win32.Dispatch('outlook.application')
     mail = outlook.CreateItem(0)
 
-    mail.To = "SEU_EMAIL@EMPRESA.COM"
+    mail.To = "bduarte@br.ibm.com; leo.pelinson@ibm.com; jose.tofoli@ibm.com"
 
     mail.Subject = f"Peixe #{numero_peixe_atual} – Process Excellence in Incentive eXecution & Efficiency – {quarter}"
 

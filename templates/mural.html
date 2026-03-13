@@ -4,6 +4,7 @@
 <head>
 
 <title>Fish Tank</title>
+
 <link rel="stylesheet" href="/static/style.css">
 
 <link rel="icon" type="image/png" href="/static/fav_icon.png">
@@ -44,6 +45,7 @@
 
 </div>
 
+
 <div class="grid">
 
 {% for peixe in peixes %}
@@ -53,9 +55,22 @@
 <h2>Peixe #{{ peixe['id'] }}</h2>
 
 <p><b>Activity:</b> {{ peixe['atividade'] }}</p>
+
 <p><b>Period:</b> {{ peixe['periodo'] }}</p>
+
 <p><b>Ranking:</b> {{ peixe['ranking'] }}</p>
-<p><b>Impact:</b> {{ peixe['impacto'] }}</p>
+
+
+<p><b>Impact:</b></p>
+
+<div class="impact-text">
+{{ peixe['impacto'] }}
+</div>
+
+<div class="read-more" onclick="toggleImpact(this)">
+Leia mais
+</div>
+
 
 <h3>💬 Comments</h3>
 
@@ -75,6 +90,7 @@
 
 </div>
 
+
 <form action="/comentar" method="POST">
 
 <input type="hidden" name="peixe_id" value="{{ peixe['id'] }}">
@@ -92,6 +108,30 @@
 {% endfor %}
 
 </div>
+
+
+<script>
+
+function toggleImpact(button) {
+
+const impact = button.previousElementSibling
+
+if (impact.classList.contains("expanded")) {
+
+impact.classList.remove("expanded")
+button.innerText = "Leia mais"
+
+} else {
+
+impact.classList.add("expanded")
+button.innerText = "Leia menos"
+
+}
+
+}
+
+</script>
+
 
 </body>
 </html>
