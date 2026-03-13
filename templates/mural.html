@@ -2,14 +2,15 @@
 <html>
 
 <head>
+
 <title>Fish Tank</title>
 <link rel="stylesheet" href="/static/style.css">
-<img src="/static/ibm_logo.png" class="ibm-logo">
-<a href="/recognitions" class="recognition-btn">
-</a>
+
 </head>
 
 <body>
+
+<img src="/static/ibm_logo.png" class="ibm-logo">
 
 <h1>🐟 Fish Tank - Contribution Board - Lucas Galdino</h1>
 
@@ -17,28 +18,26 @@
 
 <div class="stat-card">
 <h2>🐟</h2>
-<p>{{total_peixes}}</p>
+<p>{{ total_peixes }}</p>
 <span>Total Contributions</span>
 </div>
 
 <div class="stat-card">
 <h2>🦈</h2>
-<p>{{big_fish}}</p>
+<p>{{ big_fish }}</p>
 <span>Big Fish</span>
 </div>
 
 <div class="stat-card">
 <h2>💬</h2>
-<p>{{total_comentarios}}</p>
+<p>{{ total_comentarios }}</p>
 <span>Comments</span>
 </div>
 
 <a href="/recognitions" class="stat-card clickable">
-
 <h2>🏆</h2>
 <p>Recognition Wall</p>
 <span>Check my recognitions</span>
-
 </a>
 
 </div>
@@ -49,12 +48,12 @@
 
 <div class="card">
 
-<h2>Peixe #{{ peixe[0] }}</h2>
+<h2>Peixe #{{ peixe['id'] }}</h2>
 
-<p><b>Activity:</b> {{ peixe[1] }}</p>
-<p><b>Period:</b> {{ peixe[2] }}</p>
-<p><b>Ranking:</b> {{ peixe[3] }}</p>
-<p><b>Impact:</b> {{ peixe[4] }}</p>
+<p><b>Activity:</b> {{ peixe['atividade'] }}</p>
+<p><b>Period:</b> {{ peixe['periodo'] }}</p>
+<p><b>Ranking:</b> {{ peixe['ranking'] }}</p>
+<p><b>Impact:</b> {{ peixe['impacto'] }}</p>
 
 <h3>💬 Comments</h3>
 
@@ -62,10 +61,10 @@
 
 {% for c in comentarios %}
 
-{% if c[1] == peixe[0] %}
+{% if c['peixe_id']|int == peixe['id'] %}
 
 <div class="comment">
-<strong>{{ c[2] }}</strong>: {{ c[3] }}
+<strong>{{ c['autor'] }}</strong>: {{ c['comentario'] }}
 </div>
 
 {% endif %}
@@ -76,7 +75,7 @@
 
 <form action="/comentar" method="POST">
 
-<input type="hidden" name="peixe_id" value="{{ peixe[0] }}">
+<input type="hidden" name="peixe_id" value="{{ peixe['id'] }}">
 
 <input type="text" name="autor" placeholder="Your name">
 
